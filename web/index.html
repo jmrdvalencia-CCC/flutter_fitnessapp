@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Fitness Tracker - Weight Loss Plan 78kg to 65-68kg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fitness Tracker">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Fitness Tracker - 78kg → 65-68kg</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0F0F23;
+      overflow: hidden;
+    }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #0F0F23;
+    }
+
+    .loading p {
+      color: #FF6B35;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #1A1A2E;
+      border-top: 4px solid #FF6B35;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Loading Fitness Tracker...</p>
+  </div>
+
+  <script>
+    // Browser Notification Helper
+    window.FitnessNotifications = {
+      requestPermission: async function() {
+        if ('Notification' in window) {
+          const permission = await Notification.requestPermission();
+          return permission === 'granted';
+        }
+        return false;
+      },
+
+      sendNotification: function(title, body) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification(title, {
+            body: body,
+            icon: 'icons/Icon-192.png',
+            badge: 'icons/Icon-192.png',
+            tag: 'fitness-reminder',
+          });
+        }
+      },
+
+      // Start periodic reminder checks
+      startReminders: function() {
+        if (window._reminderInterval) clearInterval(window._reminderInterval);
+
+        window._reminderInterval = setInterval(function() {
+          const now = new Date();
+          const weekday = now.getDay(); // 0=Sun, 1=Mon...
+          const hour = now.getHours();
+          const minute = now.getMinutes();
+
+          const reminders = window.FitnessNotifications._getReminders(weekday, hour, minute);
+          reminders.forEach(function(r) {
+            const key = now.toDateString() + '-' + hour + ':' + minute + '-' + r.title;
+            if (!window._firedReminders) window._firedReminders = new Set();
+            if (!window._firedReminders.has(key)) {
+              window._firedReminders.add(key);
+              window.FitnessNotifications.sendNotification(r.title, r.body);
+            }
+          });
+        }, 60000); // Check every minute
+      },
+
+      stopReminders: function() {
+        if (window._reminderInterval) {
+          clearInterval(window._reminderInterval);
+          window._reminderInterval = null;
+        }
+      },
+
+      _getReminders: function(weekday, hour, minute) {
+        const reminders = [];
+
+        // Fasted Cardio - Mon(1), Tue(2), Thu(4) at 4:50
+        if ([1, 2, 4].includes(weekday) && hour === 4 && minute === 50) {
+          reminders.push({title: '🏃 Fasted Cardio Time!', body: 'Get up! 20-30 min brisk walk before breakfast.'});
+        }
+
+        // Afternoon workout at 16:45
+        if ([1, 2, 4].includes(weekday) && hour === 16 && minute === 45) {
+          reminders.push({title: '🔥 Workout in 15 min!', body: 'Interval Sprints + Circuit. LFG! 💪'});
+        }
+
+        // Gym Wed at 8:45
+        if (weekday === 3 && hour === 8 && minute === 45) {
+          reminders.push({title: '💪 Gym: Push + Abs + HIIT', body: 'Head to Anytime Fitness!'});
+        }
+
+        // Gym Fri at 8:45
+        if (weekday === 5 && hour === 8 && minute === 45) {
+          reminders.push({title: '💪 Gym: Pull + Legs + HIIT', body: 'Head to Anytime Fitness!'});
+        }
+
+        // Gym Sat at 6:45
+        if (weekday === 6 && hour === 6 && minute === 45) {
+          reminders.push({title: '🔥 Full Body Circuit!', body: 'Saturday burn session!'});
+        }
+
+        // Water at 10:00 and 14:00
+        if (hour === 10 && minute === 0) {
+          reminders.push({title: '💧 Water Check!', body: 'Target: 3L today!'});
+        }
+        if (hour === 14 && minute === 0) {
+          reminders.push({title: '💧 Water Check!', body: 'Hydration! No softdrinks!'});
+        }
+
+        // Dinner at 19:30
+        if (hour === 19 && minute === 30) {
+          reminders.push({title: '🥗 Dinner: NO RICE!', body: 'High protein only. Tuna/eggs/tokwa + veggies.'});
+        }
+
+        // Checklist at 21:00
+        if (hour === 21 && minute === 0) {
+          reminders.push({title: '✅ Daily Checklist', body: 'Complete all 7 tasks!'});
+        }
+
+        // Sleep at 21:45
+        if (hour === 21 && minute === 45) {
+          reminders.push({title: '🛌 Sleep in 15 min!', body: 'Sleep = recovery + fat loss.'});
+        }
+
+        // Monday weigh-in at 6:15
+        if (weekday === 1 && hour === 6 && minute === 15) {
+          reminders.push({title: '⚖️ WEIGH-IN DAY!', body: 'Step on scale! After bathroom, before eating.'});
+        }
+
+        return reminders;
+      }
+    };
+
+    // Auto-start reminders if permission already granted
+    if ('Notification' in window && Notification.permission === 'granted') {
+      window.FitnessNotifications.startReminders();
+    }
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
