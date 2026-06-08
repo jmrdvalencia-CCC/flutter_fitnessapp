@@ -15,8 +15,13 @@ class FitnessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.windows ||
+         defaultTargetPlatform == TargetPlatform.macOS ||
+         defaultTargetPlatform == TargetPlatform.linux);
+
     return MaterialApp(
-      title: 'Fitness Tracker',
+      title: 'Fitness Tracker - 78kg → 65-68kg',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.dark(
@@ -28,23 +33,7 @@ class FitnessApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF0F0F23),
         useMaterial3: true,
       ),
-      home: _buildHome(),
+      home: (kIsWeb || isDesktop) ? const WebHomeScreen() : const HomeScreen(),
     );
-  }
-
-  Widget _buildHome() {
-    // Web always uses responsive web layout
-    if (kIsWeb) return const WebHomeScreen();
-
-    // Desktop platforms use responsive web layout too
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.windows:
-      case TargetPlatform.macOS:
-      case TargetPlatform.linux:
-        return const WebHomeScreen();
-      default:
-        // iOS/Android use mobile bottom nav
-        return const HomeScreen();
-    }
   }
 }
