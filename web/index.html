@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base href="/">
+  <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Fitness Tracker - Weight Loss Plan 78kg to 65-68kg">
@@ -179,5 +179,12 @@
   </script>
 
   <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // Fallback: hide loading after 10s if Flutter doesn't load
+    setTimeout(function() {
+      var el = document.getElementById('loading');
+      if (el) el.style.display = 'none';
+    }, 15000);
+  </script>
 </body>
 </html>

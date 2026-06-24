@@ -25,7 +25,13 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release --base-href "/"
+        run: flutter build web --release --base-href "/" --pwa-strategy none
+
+      - name: Copy Cloudflare config files
+        run: |
+          cp web/_headers build/web/_headers
+          cp web/_redirects build/web/_redirects
+          rm -f build/web/flutter_service_worker.js
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
